@@ -1,0 +1,297 @@
+#创建公有pod库
+
+ ## 1.注册**CocoaPods**账户信息
+想要创建一个开源pod库, 首先我们需要注册CocoaPods，[官方链接](https://guides.cocoapods.org/making/getting-setup-with-trunk.html)。
+```
+1	pod trunk register 邮箱地址 '用户名' ‑‑verbose
+2	pod trunk register xxx.com 'Bobtao' ‑‑verbose
+
+```
+
+这里我们一般使用 github 邮箱和用户名, 然后在你的邮箱中会收到确认邮件, 在浏览	中点击链接确认即注册成功,
+
+成功之后可以终端执行:
+```
+pod trunk me
+```
+
+## 2.创建Pod项目工程
+
+共享库需要三个必不可少的部分:
+
+共享库需要三个必不可少的部分:
+
+A. 共享文件夹 (文件夹存放着你要共享的内容, 也就是其他人pod得到的文件, .podspec文件中的source_files需要
+指定此文件路径及文件类型);
+
+B.LICENSE文件 (默认一般选择MIT);
+
+C.库描述文件.podspec (本库的各项信息描述, 需要提交给CocoaPods, pod通过这个文件查找到你共享的库,
+
+.podspec文件的格式见第).
+
+这一步有两种方式:
+
+A.如果你已经有了现成的想要共享的文件,用终端命令生成 podspec 库描述文件，开源证书
+```
+pod spec create TBFontAdjust
+
+```
+B.你想要创建一个全新的带演示Demo的工程去做自己的共享, 可以使用终端命令:
+```
+pod lib create TBFontAdjust	//这个会自动帮你生成demo工程以及podspec描述文件开源证书
+
+```
+举例:
+1.cd进入要创建项目的目录然后 执行以下命令
+
+```
+
+#pod lib create [项目名]
+
+$pod lib create TBFontAdjust
+
+```
+
+接着在Terminal控制台会输出5个问题：
+
+1.What language do you want to use?? [ Swift / ObjC ]
+ > ObjC
+
+ 第一个问题是问你选择Swift还是Objc构建项目。此教程 选的是ObjC
+
+2.Would you like to include a demo application with your library? [ Yes / No ]
+ > Yes
+
+ 第二个问题问你是否需要创建一个Demo项目，此教程选的是Yes
+
+ 3.Which testing frameworks will you use? [ Specta / Kiwi / None ]
+ > None
+
+ 第三个问题让你是否选择一个测试框架，此教程选 None
+
+ 4.Would you like to do view based testing? [ Yes / No ]
+  > Yes
+
+5.What is your class prefix?
+ > tdb
+
+ 填写完成后，会自动打开工程。
+
+ ## 2.配置pod工程
+
+2.配置
+```
+Pod::Spec.new do |s|
+  s.name             = 'TBFontAdjust'//项目名
+  s.version          = '0.1.0'//版本
+  s.summary          = 'iOS adjust test'//简介
+
+# This description is used to generate tags and improve search results.
+#   * Think: What does it do? Why did you write it? What is the focus?
+#   * Try to keep it short, snappy and to the point.
+#   * Write the description between the DESC delimiters below.
+#   * Finally, don't worry about the indent, CocoaPods strips it!
+//描述
+  s.description      = <<-DESC
+测试
+                       DESC
+
+  s.homepage         = 'https://github.com/bobtaocool/TBFontAdjust'
+  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
+  #开源协议
+  s.license          = { :type => 'MIT', :file => 'LICENSE' }
+   #作者
+  s.author           = { 'TDB' => '1639008265@qq.com' }
+  #源代码的链接地址
+  s.source           = { :git => 'https://github.com/bobtaocool/TBFontAdjust.git', :tag => s.version.to_s }
+  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+
+   #支持的平台及版本
+  s.ios.deployment_target = '8.0'
+
+ #资源文件地址（把你的库代码放在这个Classes）
+  s.source_files = 'TBFontAdjust/Classes/**/*'
+
+  # s.resource_bundles = {
+  #   'TBFontAdjust' => ['TBFontAdjust/Assets/*.png']
+  # }
+
+#公开头文件地址
+  # s.public_header_files = 'Pod/Classes/**/*.h'
+#所需的framework，多个用逗号隔开
+  # s.frameworks = 'UIKit', 'MapKit'
+#依赖关系，该项目所依赖的其他库，如果有多个需要填写多个s.dependency
+  # s.dependency 'AFNetworking', '~> 2.3'
+end
+
+```
+
+配置完成可以进行验证
+
+>pod lib lint
+
+如出现警告：可以
+>podspec --use-libraries --allow-warnings
+
+如果出现passed validation说明配置没问题
+
+配置好后，sourectree 提交,推送到远程。
+
+3.本地测试
+打开Example工程目录Podfile文件修改下pod 的引用
+
+```
+ #pod 'MyLib', :path => '../' # 指定路径
+ pod 'TBFontAdjust', :podspec => '../TBFontAdjust.podspec'
+
+```
+ 然后在Example工程目录下执行pod update命令
+ 打开项目工程，现在可以看到库文件都被加载到Pods子项目中了.
+
+
+4.推送到远程仓库
+提交代码到远程仓库
+```
+git add .
+git commit ‐m “xxx”
+git remote add origin 远程仓库代码地址
+git push origin master
+```
+给仓库打标签
+```
+git tag ‐a 1.0.0 ‐m “1.0.0 release” (这里的版本号与podspec里一致)
+git tag //查看标签是否成功
+git push origin ‐‐tags
+```
+
+## 2.创建私有的仓库(Spec Repo)
+
+执行以下命令:(库名，地址需和配置文件填写一样)
+>pod repo add 库名 地址
+
+#### TBFontAdjust.podspec提交到远程Spec Repo仓库中
+
+cd进入TBFontAdjust项目根目录
+
+```
+# pod repo push [Repo名] [podspec 文件名字]
+$ pod repo push TBFontAdjust TBFontAdjust.podspec
+
+```
+
+如果提交成功可以在~/.cocoapods/repos/MySpecs目录下查看
+
+#### 上传项目到Cocoapods官方的仓库里去
+
+```
+pod trunk push TBFontAdjust.podspec
+或者
+pod trunk push TBFontAdjust.podspec ‐‐allow‐warnings
+
+```
+
+```
+Updating spec repo `master`
+Validating podspec
+ -> TBFontAdjust (0.1.0)
+
+Updating spec repo `master`
+
+--------------------------------------------------------------------------------
+ 🎉  Congrats
+
+ 🚀  TBFontAdjust (0.1.0) successfully published
+ 📅  October 21st, 08:47
+ 🌎  https://cocoapods.org/pods/TBFontAdjust
+ 👍  Tell your friends!
+--------------------------------------------------------------------------------
+bogon:TBFontAdjust bob$
+
+```
+说明提交成功了.
+
+## 3.查看操作是否成功
+
+pod search TBFontAdjust
+
+有时候会遇到搜索不到的情况:
+执行 pod install
+
+## 更新迭代
+1.更新源代码版本号（如：1.1.1->1.1.2）。
+2.重新push version tag。
+3.然后再执行pod trunk push操作。
+
+# gitlab 创建私有pod库
+
+创建公有Pod库或者私有Pod库, 实际上原理是一样的, 都是基于git服务和repo协议, 不一样的是, 两者的版本索引查询方式不一样, 公有库的podspec由CocoaPods/Specs管理, 而内部私有使用的pod库需要自己建立一个仓库来管理
+
+1、创建私有内部仓库
+
+1、在私有库gitlab仓库创建一个repo ->YKSpecs 存放管理内部私有 Spec （类似公有库的podspec
+
+由CocoaPods/Specs）
+
+2、查看本机现有远程索引库
+
+
+
+
+1	pod repo
+
+2
+
+3	//若没添加私有内部库，只有一个 CocoaPods 远程索引库，也是官方的索引库
+
+4
+
+5	master
+
+6	‑ Type: git (master)
+
+7	‑ URL:	https://github.com/CocoaPods/Specs.git
+
+8	‑ Path: /Users/songhe/.cocoapods/repos/master
+
+
+
+
+3、将私有库添加到本地
+
+
+
+
+1	pod repo add YKSpecs http://gitlab.yeahka.com/App/iOS/Modules/YKSpecs.git
+
+2
+
+3	或者通过SSH
+
+4
+
+5	pod repo add YKSpecs ssh://git@gitlab.yeahka.com:37600/App/iOS/Modules/YKSpecs.git
+
+6
+
+7
+
+8	//添加成功后再次查询可以看到 YKSpecs 表示添加成功
+
+9	master
+
+‑ Type: git (master)
+
+‑ URL:  https://github.com/CocoaPods/Specs.git
+
+‑ Path: /Users/songhe/.cocoapods/repos/master
+
+
+
+YKSpecs
+
+‑ Type: git (master)
+
+‑ URL:  ssh://git@gitlab.yeahka.com:37600/App/iOS/Modules/YKSpecs.git
+
+‑ Path: /Users/songhe/.cocoapods/repos/YKSpecs
